@@ -1,5 +1,3 @@
-
-
 class Attribute() :
 	def __init__(self, a):
 		'''a is a letter'''
