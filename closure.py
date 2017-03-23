@@ -1,5 +1,5 @@
 import argparse
-#import datastruc
+import datastruc
 
 
 def main():
@@ -7,8 +7,6 @@ def main():
 
 
 	group = parser.add_mutually_exclusive_group(required=True)
-
-	#subgroup = group.add_mutually_exclusive_group()
 
 	group.add_argument('-naive', action='store_const', const="naive",  help='Run naive algorithm')
 
