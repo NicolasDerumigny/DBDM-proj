@@ -1,34 +1,73 @@
 class Attribute() :
-	def __init__(self, a):
+	def __init__(self, name):
 		'''a is a letter'''
-		self.id=a
+		self.id=name
+
+	def __str__(self):
+		return self.id
 
 
 class SetAttributes(set):
 	def __init__(self):
 		self=set()
+
 	def __init__(self, *elements):
 		'''elements is some Attribute'''
 		self=set(elements)
-	
+
+	def __str__(self):
+		str_ret="{"
+		for i in range(len(list(self))):
+			str_ret+=str(list(self)[i])
+			if i!=len(list(self))-1:
+				str_ret+=", "
+		str_ret+="}"
+		return str_ret
+
+	def isin(self, name):
+		for attr in self:
+			if attr.name==name:
+				return True
+		return False 
+
 	
 class SetSetAttributes(set):
 	def __init__(self):
 		self=set()
+
 	def __init__(self, *elements):
 		'''elements is some SetAttributes'''
 		self=set(elements)
-		
+
+	def __str__(self):
+		str_ret=""
+		for attr in self:
+			str_ret+="Set: {"
+			str_ret+=str(attr)
+			str_ret+="}\n"
+		return str_ret
+	
 		
 class FD:
 	def __init__(self, element1, element2): 
 		'''element1 and element2 are two SetAttributes'''
-		self= (element1, element2)		
+		self.pre=element1
+		self.post=element2
+
+	def __str__(self):
+		return"{} -> {}\n".format(self.pre, self.post)
 			
 	
 class SetFDs(set):
 	def __init__(self):
 		self=set()
+
 	def __init__(self, *elements):
 		'''elements is some FD'''
 		self=set(elements)
+
+	def __str__(self):
+		str_ret=""
+		for FD in self:
+			str_ret+=str(FD)
+		return str_ret
