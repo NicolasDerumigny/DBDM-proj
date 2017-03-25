@@ -39,16 +39,24 @@ def main():
 	if args.input=="-":
 		input_source=sys.stdin
 	else:
-		input_source=open(args.input,'r')
+		try:
+			input_source=open(args.input,'r')
+		except FileNotFoundError:
+			print("Error: File {} not found".format(args.input))
+			exit(-1)
 
 	fun_deps, ref_attr=libinput.parseInput(input_source, args.debug)
+
+	if args.input!="-":
+		input_source.close()
+
 
 	if args.debug:
 		print("Used_attr:")
 		print(ref_attr)
 
 	if args.naive!=None or args.improved!=None:
-		libinput.parseAtts(args.atts, args.debug, fun_deps)
+		libinput.parseAtts(args.atts, ref_attr, args.debug)
 
 		if args.naive!=None:
 			# Naive version here
@@ -66,13 +74,13 @@ def main():
 		# Decomposed here
 		pass
 
-
-
 	#except Exception as err:
 	#	exc_type, exc_obj, exc_tb = sys.exc_info()
 	#	fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-	#	print("{} l.{}: {}" .format(fname, exc_tb.tb_lineno, err))
-
+	#	if debug:
+	#		print("{} l.{}: {}" .format(fname, exc_tb.tb_lineno, err))
+	#	else:
+	#		print(err)
 
 
 
