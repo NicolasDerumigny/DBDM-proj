@@ -29,17 +29,17 @@ def parseInput(ioFile, debug):
 
 	return set_of_func_dep, ref_attr
 
-def parseAtts(StrAttr, set_fd, debug):
+def parseAtts(StrAttr, ref_attr, debug):
 	''' Parse the Atts string provided to the script'''
 	set_of_attr=SetAttributes()
 	lst_attr=StrAttr.split()
 	for attr in lst_attr:
-		if attr in set_fd:
-			set_of_attr.add(set_fd[attr])
-		else:
-			raise Exception("{} is not provided in the rules but present as attribute".format(attr))
+		if attr not in ref_attr:
+			ref_attr[attr]=Attribute(attr)
+		set_of_attr.add(ref_attr[attr])
+			# ? raise Exception("{} is not provided in the rules but present as attribute".format(attr))
 
 	if debug:
 		print(set_of_attr)
 	
-	return set_of_attr
+	return set_of_attr, ref_attr

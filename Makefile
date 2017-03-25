@@ -1,14 +1,14 @@
 MAINFILE=closure
 
 #INPUT=examples/CCF2015P.txt
-INPUT=examples/ex.TD3.txtz
+INPUT=examples/ex.TD3.txt
 ATTR="A E C"
-all: test1
-
-test-all: test1
-
-test1: $(MAINFILE).py 
+all: $(MAINFILE).py 
 	python3 $^ -naive -debug $(INPUT) $(ATTR)
+
+test: $(MAINFILE).py 
+	python3 $^ -test
+
 
 
 clean:

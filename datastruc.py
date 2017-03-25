@@ -23,13 +23,6 @@ class SetAttributes(set):
 				str_ret+=", "
 		str_ret+="}"
 		return str_ret
-
-	def isin(self, name):
-		for attr in self:
-			if attr.name==name:
-				return True
-		return False 
-
 	
 class SetSetAttributes(set):
 	def __init__(self):
