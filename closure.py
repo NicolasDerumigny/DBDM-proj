@@ -66,14 +66,19 @@ def main():
 			if result==closu:
 				print("\tPassed")
 			else:
-				print("\tFailed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
+				print("\tFailed (naive alg) on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
 				failed+=1
 
 			print("Improved:")
-			print("\tNot implemented yet")
+			closu=cl_alg.improved(set_attr, fun_deps, None)
+			if result==closu:
+				print("\tPassed")
+			else:
+				print("\tFailed (improved alg) on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
+				failed+=1
 			num+=1
 		if failed:
-			print("Error: {}/{} tests failed".format(failed, num-1))
+			print("Error: {}/{} tests failed".format(failed, 2*(num-1)))
 		exit()
 
 
