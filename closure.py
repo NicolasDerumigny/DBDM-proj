@@ -36,7 +36,6 @@ def main():
 
 	if args.test!=None:
 		# Execute unit tests
-		print("Executing Unit tests:")
 
 		tests=[
 		("A -> A","A","A"),
@@ -45,11 +44,111 @@ def main():
 		("A -> B\n B -> C D", "A", "A B C D"),
 		("A -> A\n A -> A\n B -> F G","B E","B F G E")
 		]
-		# Test[i]=( fd, attr, result)
+
 		num=1
 		failed=0
+		# Test[i]=( fd, attr, result)
+
+
+		print("Executing Unit tests:")
+		
+
+		print("Testing Attributes method:")
 		for t in tests:
-			print("\n#{}".format(num))
+			file=open("/tmp/test",'w')
+			file.write(t[0])
+			file.close()
+
+			file=open("/tmp/test",'r')
+			fun_deps, ref_attr=libinput.parseInput(file, None)
+			file.close()
+
+
+			for str_attr in ref_attr:
+				attr=ref_attr[str_attr]
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				if len(attr.lst)!=0:
+					print("Error: non-empty list at initialisation for attr {} (size {})".format(attr, len(attr.lst)))
+					failed+=1
+				else:
+					print("-> ok")
+
+
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				lst=set()
+				for fd2 in fun_deps:
+					attr.addLst(fd2)
+					lst.add(fd2)
+					if attr.lst!=lst:
+						print("Error: addLst() wrongly add {}: lst is {} instead of {}".format(fd2,attr.lst,lst))
+						failed+=1
+						break
+				else:
+					print("-> ok")
+
+
+
+		print("Testing FD methods:")
+		for t in tests:
+			file=open("/tmp/test",'w')
+			file.write(t[0])
+			file.close()
+
+			file=open("/tmp/test",'r')
+			fun_deps, ref_attr=libinput.parseInput(file, None)
+			file.close()
+
+			print("\tTesting setCount() and isCountNull():")
+			for i in fun_deps:
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				i.setCount()
+				if (i.count!=len(i.pre)):
+					print("Error on SetCount(): output is {} instead of {} for FD {}".format(i.count,len(i.pre),i))
+					failed+=1
+				elif (i.isCountNull()):
+					print("Error on isCountNull(): for FD {}, count = {}, output state that fd.count is null".format(i, i.count))
+					failed+=1
+				else:
+					print("-> ok")
+
+
+				
+			print("\tTesting decCount() and is CountNull()")
+			for i in fun_deps:
+				values=range(i.count-1,-1,-1)
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				for j in values:
+					i.decCount()
+					if i.count!=j:
+						failed+=1
+						print("Error on decCount() for FD {} while decreasing to {}".format(i, j))
+						break
+					elif (i.isCountNull() and j!=0):
+						print("Error on isCountNull(): for FD {}, count = {}, output state taht fd.count is null".format(i, i.count))
+						failed+=1
+						break
+				else:
+					print("-> ok")
+
+			print("\tTesting is CountNull():")
+			for i in fun_deps:
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				if not(i.isCountNull()):
+					failed+=1
+					print("Error on isCountNull() for FD {} with count = {}".format(i, i.count))
+				else:
+					print("-> ok")
+
+
+		print("Testing algorithm output:")
+		# Testing whole algorithm
+		print("\tTesting naive alg:")
+		for t in tests:
 			file=open("/tmp/test",'w')
 			file.write(t[0])
 			file.close()
@@ -61,24 +160,47 @@ def main():
 			set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
 			result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
 
-			print("Naive:")
-			closu=cl_alg.naive(set_attr, fun_deps, None)
-			if result==closu:
-				print("\tPassed")
-			else:
-				print("\tFailed (naive alg) on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
-				failed+=1
 
-			print("Improved:")
-			closu=cl_alg.improved(set_attr, fun_deps, None)
-			if result==closu:
-				print("\tPassed")
-			else:
-				print("\tFailed (improved alg) on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
-				failed+=1
+			
+			print("\t\t#{}".format(num), end=" ")
 			num+=1
+			closu=cl_alg.naive(set_attr, fun_deps, None)
+			if result!=closu:
+				print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
+				failed+=1
+			else:
+				print("-> ok")
+
+		print("\tTesting improved alg:")
+		for t in tests:
+			file=open("/tmp/test",'w')
+			file.write(t[0])
+			file.close()
+
+			file=open("/tmp/test",'r')
+			fun_deps, ref_attr=libinput.parseInput(file, None)
+			file.close()
+
+			set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
+			result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
+
+			
+			print("\t\t#{}".format(num), end=" ")
+			num+=1
+			closu=cl_alg.improved(set_attr, fun_deps, None)
+			if result!=closu:
+				print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
+				failed+=1
+			else:
+				print("-> ok")
+
+		num-=1
+
 		if failed:
-			print("Error: {}/{} tests failed".format(failed, 2*(num-1)))
+			print("Error: {}/{} tests failed".format(failed, num))
+		else:
+			print("Passed: {}/{} tests".format(num, num))
+
 		exit()
 
 
@@ -116,8 +238,9 @@ def main():
 			print(closu)
 
 		elif args.improved!=None:
-			# Improved version here
-			pass
+			closu=cl_alg.improved(set_attr, fun_deps, args.debug)
+			print("The closure of {} is:".format(set_attr))
+			print(closu)
 
 	elif args.normalized!=None:
 		# Normalized here
