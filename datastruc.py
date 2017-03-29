@@ -28,7 +28,6 @@ class SetFDs(set):
 
 class Attribute() :
 	def __init__(self, name):
-		'''a is a letter'''
 		self.id=name
 		self.lst=SetFDs()
 
@@ -53,6 +52,9 @@ class SetAttributes(set):
 
 
 class SetSetAttributes(set):
+	def __init__(self, init_set):
+		self=set(frozenset(init_set))
+
 	def __str__(self):
 		str_ret=""
 		for attr in self:

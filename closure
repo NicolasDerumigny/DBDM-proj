@@ -256,13 +256,15 @@ def main():
 
 	########################################## NORMALIZE ##########################################
 	elif args.normalized!=None:
-		# Normalized here
-		pass
+		norm=cl_alg.reduce(minimize(fun_deps, args.debug), args.debug)
+		print("The normal form is:")
+		print(norm)
 
 	########################################## DECOMPOSE ##########################################
 	elif args.decompose!=None:
-		# Decomposed here
-		pass
+		dec=cl_alg.decompose(fun_deps, cl_alg.schema(fun_deps), args.debug)
+		print("The BCNF is:")
+		print(dec)
 
 	#except Exception as err:
 	#	exc_type, exc_obj, exc_tb = sys.exc_info()

@@ -38,8 +38,7 @@ def parseAtts(StrAttr, ref_attr, debug):
 		if attr not in ref_attr:
 			ref_attr[attr]=Attribute(attr)
 		set_of_attr.add(ref_attr[attr])
-			# ? raise Exception("{} is not provided in the rules but present as attribute".format(attr))
-
+			
 	if debug:
 		print("Initial set of attributes:", end=" ")
 		print(set_of_attr)
