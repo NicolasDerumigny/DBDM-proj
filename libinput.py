@@ -25,6 +25,7 @@ def parseInput(ioFile, debug):
 			set_of_func_dep.add(FD(precondition,postcondition))
 
 	if debug:
+		print("Initial set of fun dep:")
 		print(set_of_func_dep)
 
 	return set_of_func_dep, ref_attr
@@ -40,6 +41,7 @@ def parseAtts(StrAttr, ref_attr, debug):
 			# ? raise Exception("{} is not provided in the rules but present as attribute".format(attr))
 
 	if debug:
+		print("Initial set of attributes:", end=" ")
 		print(set_of_attr)
 	
 	return set_of_attr, ref_attr

@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 import argparse
 import sys
 import os
+from random import shuffle
 import datastruc
 import libinput
 import clos_algorithms as cl_alg
@@ -33,7 +36,7 @@ def main():
 	#try:
 	args = parser.parse_args()
 
-
+	########################################## TESTS ##########################################
 	if args.test!=None:
 		# Execute unit tests
 
@@ -204,12 +207,18 @@ def main():
 		exit()
 
 
-
+	########################################## GENERATE ##########################################
 	if args.generate!=None:
-		# Generate here
+		out=[]
+		for i in range(args.generate):
+			out+=["{} -> {}".format(i,i+1)]
+		shuffle(out)
+		for i in out:
+			print(i)
 		exit()
 
 
+	########################################## PARSE ##########################################
 	if args.input=="-":
 		input_source=sys.stdin
 	else:
@@ -226,26 +235,31 @@ def main():
 
 
 	if args.debug:
-		print("Used_attr:")
-		print(ref_attr)
+		print("Used_attr:", end=" ")
+		for i in ref_attr:
+			print(i, end=" ")
+		print()
 
+	########################################## ALGORITHMS ##########################################
 	if args.naive!=None or args.improved!=None:
 		set_attr, ref_attr=libinput.parseAtts(args.atts, ref_attr, args.debug)
 
 		if args.naive!=None:
 			closu=cl_alg.naive(set_attr, fun_deps, args.debug)
-			print("The closure of {} is:".format(set_attr))
+			print("The closure of {} is:".format(set_attr), end=" ")
 			print(closu)
 
 		elif args.improved!=None:
 			closu=cl_alg.improved(set_attr, fun_deps, args.debug)
-			print("The closure of {} is:".format(set_attr))
+			print("The closure of {} is:".format(set_attr), end=" ")
 			print(closu)
 
+	########################################## NORMALIZE ##########################################
 	elif args.normalized!=None:
 		# Normalized here
 		pass
 
+	########################################## DECOMPOSE ##########################################
 	elif args.decompose!=None:
 		# Decomposed here
 		pass

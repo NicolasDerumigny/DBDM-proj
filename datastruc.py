@@ -19,13 +19,6 @@ class FD:
 			
 	
 class SetFDs(set):
-	def __init__(self):
-		self=set()
-
-	def __init__(self, *elements):
-		'''elements is some FD'''
-		self=set(elements)
-
 	def __str__(self):
 		str_ret=""
 		for FD in self:
@@ -46,13 +39,6 @@ class Attribute() :
 		self.lst.add(FD)
 
 class SetAttributes(set):
-	def __init__(self):
-		self=set()
-
-	def __init__(self, *elements):
-		'''elements is some Attribute'''
-		self=set(elements)
-
 	def __str__(self):
 		str_ret="{"
 		for i in range(len(list(self))):
@@ -61,15 +47,12 @@ class SetAttributes(set):
 				str_ret+=", "
 		str_ret+="}"
 		return str_ret
-	
+
+	def union(self, otherSet):
+		return SetAttributes(set(self).union(otherSet))
+
+
 class SetSetAttributes(set):
-	def __init__(self):
-		self=set()
-
-	def __init__(self, *elements):
-		'''elements is some SetAttributes'''
-		self=set(elements)
-
 	def __str__(self):
 		str_ret=""
 		for attr in self:
