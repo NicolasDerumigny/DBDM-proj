@@ -13,19 +13,19 @@ def main():
 
 	group = parser.add_mutually_exclusive_group(required=True)
 
-	group.add_argument('-naive', action='store_const', const="naive",  help='Run naive algorithm')
+	group.add_argument('-naive', action='store_const', const=1,  help='Run naive algorithm')
 
-	group.add_argument('-improved', action='store_const', const="improved",  help='Run improved algorithm')
+	group.add_argument('-improved', action='store_const', const=1,  help='Run improved algorithm')
 
 	group.add_argument('-generate', metavar="n", type=int, help='Generate a set of n FD')
 
-	group.add_argument('-normalized', action='store_const', const="normalized",  help='Normalized an input')
+	group.add_argument('-normalized', action='store_const', const=1,  help='Normalized an input')
 
-	group.add_argument('-decompose', action='store_const',  const="decomposed", help='Decompose an input')
+	group.add_argument('-decompose', action='store_const',  const=1, help='Decompose an input')
 
-	group.add_argument('-test', action='store_const',  const="test", help='Decompose an input')
+	group.add_argument('-test', action='store_const',  const=1, help='Decompose an input')
 
-	parser.add_argument('-debug', action='store_const', const="debug",  help='Print Debug')
+	parser.add_argument('-debug', action='store_const', const=1,  help='Print Debug')
 
 	parser.add_argument('input', nargs='?', type=str,  help='Input on which reading')
 
