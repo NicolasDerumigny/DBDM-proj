@@ -2,7 +2,7 @@ import random
 from datastruc import *
 
 def naive(set_attr, fun_deps, debug = False):
-	'''Compute the closure of ref_attr with respect to fun_dep using the naive algorithm'''
+	'''Compute the closure of ref_attr with respect to fun_deps using the naive algorithm'''
 	done=False
 	out=set_attr.copy()
 	while (not(done)):
@@ -15,7 +15,7 @@ def naive(set_attr, fun_deps, debug = False):
 	return out
 
 def improved(set_attr, fun_deps, debug = False):
-	'''Compute the closure of ref_attr with respect to fun_dep using the improved algorithm'''
+	'''Compute the closure of ref_attr with respect to fun_deps using the improved algorithm'''
 	for dep in fun_deps:
 		dep.setCount()
 		for attr in dep.pre:
@@ -78,23 +78,39 @@ def schema(fun_deps, debug = False):
 		schem=schem.union(dep.pre).union(dep.post)
 	return schem
 
-def isAKeyOf(set_attr, fun_deps, debug = False):
+def isAKeyOf(set_attr, fun_deps:SetFDs(), debug = False):
 	'''Return True if and only if set_attr is a key of schema(fun_deps)'''
 	return schema(fun_deps) <= improved(set_attr, fun_deps, debug)
 
-def isInBCNF(set_attr, fun_deps, debug = False):
-	'''Return True if and only if fun_deps is in Boyce-Codd Normal Form'''
-	for dep in fun_deps:
-		if not(dep.post<=dep.pre):
-			if not(isAKeyOf(dep.pre, fun_deps, debug)):
-				return False
-	return True
+def isNotInBCNF(set_set_attr, fun_deps, debug = False):
+	'''Return True if and only if all fun_deps is in Boyce-Codd Normal Form'''
+	for r in set_set_attr:
+		for dep in fun_deps:
+			if dep.pre <= r and not(dep.post<=dep.pre):
+				#if dep is not trivial
+				if not(isAKeyOf(dep.pre, fun_deps, debug)):
+					return r
+	return None
 
 def decompose(fun_deps, set_attr, debug = False):
 	'''Decompose fun_deps into a BCNF'''
 	F=reduce(minimize(fun_deps, debug), debug)
-	R=SetSetAttributes(set_attr)
-	while not(isInBCNF(F, debug)):
-		#TODO: find r: r in in R, r not in BCNF, and x in r such that x->y is a nontrivial non-key of F
-		R=R.difference(SetSetAttributes(r)).union(SetSetAttributes([improved(dep.pre, F, debug), (r.difference(improved(dep.pre, F, debug)).union(dep.pre))]))
+	R=SetSetAttributes.make(set_attr)
+	while True:
+		r=isNotInBCNF(R, F, debug)
+		if not(r):
+			break
+
+		for dep in F:
+			if not(dep.post<=dep.pre) and not(isAKeyOf(dep.pre, F, debug)) and dep.pre.union(dep.post) <= r :
+				break
+		print(R)
+		print(dep)
+		print("r{}".format(r))
+		R=R.difference(SetSetAttributes.make(r))
+		R.add(FrozenSetAttributes(improved(dep.pre, F, debug)))
+		print("adding {} and {}".format(improved(dep.pre, F, debug), r.difference(improved(dep.pre, F, debug)).union(dep.pre)))
+		R.add(FrozenSetAttributes(r.difference(improved(dep.pre, F, debug)).union(dep.pre)))
+		print("apres")
+		print(R)
 	return R
