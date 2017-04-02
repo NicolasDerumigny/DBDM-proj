@@ -1,17 +1,18 @@
 import random
+from datastruc import *
 
 def naive(set_attr, fun_deps, debug = False):
 	'''Compute the closure of ref_attr with respect to fun_dep using the naive algorithm'''
 	done=False
-
+	out=set_attr.copy()
 	while (not(done)):
 		done=True
 		for dep in fun_deps:
-			if (dep.pre <= set_attr) and not(dep.post <= set_attr):
-				set_attr=set_attr.union(dep.post)
+			if (dep.pre <= out) and not(dep.post <= out):
+				out=out.union(dep.post)
 				done=False
 	
-	return set_attr
+	return out
 
 def improved(set_attr, fun_deps, debug = False):
 	'''Compute the closure of ref_attr with respect to fun_dep using the improved algorithm'''
@@ -20,7 +21,7 @@ def improved(set_attr, fun_deps, debug = False):
 		for attr in dep.pre:
 			attr.addLst(dep)
 
-	closure=set_attr
+	closure=set_attr.copy()
 	update=set_attr.copy()
 	while(len(update) != 0):
 		A = random.sample(update,1)
@@ -31,24 +32,25 @@ def improved(set_attr, fun_deps, debug = False):
 			if dep.isCountNull():
 				update=update.union(dep.post.difference(closure))
 				closure=closure.union(dep.post)
+
+	fun_deps.resetFDCount()
+	closure.resetAttrLst()
 	return closure
 
 def checkIfProve(fun_deps, FD, debug = False):
 	'''Return True if and only if fun_deps involves FD'''
-	closFD=improved(FD.post, fun_deps, debug)
-	return FD.pre <= closFD
+	return FD.post <= improved(FD.pre, fun_deps, debug)
 
 def minimize(fun_deps, debug = False):
 	'''Return a minimal (in cardinality) cover of fun_deps'''
 	G=SetFDs()
 	
 	for dep in fun_deps:
-		G=G.union(FD(dep.pre,improved(dep.pre, fun_deps)))
+		G.add(FD(dep.pre,improved(dep.pre, fun_deps)))
 
 	for dep in G:
-		if checkIfProve(G.difference(setFDs(dep)),dep):
-			G=G.difference(setFDs(dep))
-
+		if checkIfProve(G.difference(SetFDs.make(dep)),dep):
+			G=G.difference(SetFDs.make(dep))
 	return G
 
 def reduce(fun_deps, debug = False):
@@ -57,10 +59,16 @@ def reduce(fun_deps, debug = False):
 	for dep in mini:
 		W=dep.post
 		for A in dep.post:
-			G=Mini.difference(setFDs(dep)).union(SetFD(FD(dep.pre,W.difference(A))))
+			G=mini.difference(SetFDs.make(dep)).union(SetFDs.make(\
+				FD(dep.pre,W.difference(SetAttributes.make(A)))))
 			if checkIfProve(G, dep):
-				W=W.difference(SetAttributes(A))
-		mini=mini.difference(SetFDs(dep)).union(SetFD(FD(dep.pre,W)))
+				W=W.difference(SetAttributes.make(A))
+
+		mini=mini.difference(SetFDs.make(dep)).union(SetFDs.make(\
+			FD(dep.pre,W)))
+
+	
+
 	return mini
 
 def schema(fun_deps, debug = False):

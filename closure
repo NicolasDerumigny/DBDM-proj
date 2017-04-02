@@ -256,12 +256,18 @@ def main():
 
 	########################################## NORMALIZE ##########################################
 	elif args.normalized!=None:
-		norm=cl_alg.reduce(minimize(fun_deps, args.debug), args.debug)
+		#TO BE TESTED on other thing than generated inputs
+		mini=cl_alg.minimize(fun_deps, args.debug)
+		if args.debug:
+			print("The minimized form is:")
+			print(mini)
+		norm=cl_alg.reduce(mini, args.debug)
 		print("The normal form is:")
 		print(norm)
 
 	########################################## DECOMPOSE ##########################################
 	elif args.decompose!=None:
+		#TO BE TESTED !
 		dec=cl_alg.decompose(fun_deps, cl_alg.schema(fun_deps), args.debug)
 		print("The BCNF is:")
 		print(dec)
