@@ -1,4 +1,5 @@
 import random
+import itertools
 from datastruc import *
 
 def naive(set_attr, fun_deps, debug = False):
@@ -78,39 +79,40 @@ def schema(fun_deps, debug = False):
 		schem=schem.union(dep.pre).union(dep.post)
 	return schem
 
-def isAKeyOf(set_attr, fun_deps:SetFDs(), debug = False):
+def isAKeyOf(set_attr, set_attr2, fun_deps:SetFDs(), debug = False):
 	'''Return True if and only if set_attr is a key of schema(fun_deps)'''
-	return schema(fun_deps) <= improved(set_attr, fun_deps, debug)
+	return checkIfProve(fun_deps, FD(set_attr, set_attr2))
 
 def isNotInBCNF(set_set_attr, fun_deps, debug = False):
 	'''Return True if and only if all fun_deps is in Boyce-Codd Normal Form'''
 	for r in set_set_attr:
 		for dep in fun_deps:
-			if dep.pre <= r and not(dep.post<=dep.pre):
+			if dep.pre <= r and dep.post <= r and not(dep.post<=dep.pre):
 				#if dep is not trivial
-				if not(isAKeyOf(dep.pre, fun_deps, debug)):
-					return r
-	return None
+				if not(isAKeyOf(dep.pre, r, fun_deps, debug)):
+					return r, dep
+	return None, None
 
 def decompose(fun_deps, set_attr, debug = False):
 	'''Decompose fun_deps into a BCNF'''
 	F=reduce(minimize(fun_deps, debug), debug)
 	R=SetSetAttributes.make(set_attr)
 	while True:
-		r=isNotInBCNF(R, F, debug)
+		r, dep=isNotInBCNF(R, F, debug)
 		if not(r):
 			break
 
-		for dep in F:
-			if not(dep.post<=dep.pre) and not(isAKeyOf(dep.pre, F, debug)) and dep.pre.union(dep.post) <= r :
-				break
-		print(R)
-		print(dep)
-		print("r{}".format(r))
-		R=R.difference(SetSetAttributes.make(r))
+		if debug:
+			print(R)
+			print(dep)
+			print("r : {}".format(r))
 		R.add(FrozenSetAttributes(improved(dep.pre, F, debug)))
-		print("adding {} and {}".format(improved(dep.pre, F, debug), r.difference(improved(dep.pre, F, debug)).union(dep.pre)))
+		
+		if debug:
+			print("adding {} and {}".format(improved(dep.pre, F, debug), r.difference(improved(dep.pre, F, debug)).union(dep.pre)))
 		R.add(FrozenSetAttributes(r.difference(improved(dep.pre, F, debug)).union(dep.pre)))
-		print("apres")
-		print(R)
-	return R
+		R=R.difference(SetSetAttributes.make(r))
+		if debug:
+			print("apres")
+			print(R)
+	return R.difference(FrozenSetAttributes())

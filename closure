@@ -33,251 +33,250 @@ def main():
 
 
 
-	#try:
-	args = parser.parse_args()
+	try:
+		args = parser.parse_args()
 
-	########################################## TESTS ##########################################
-	if args.test!=None:
-		# Execute unit tests
+		########################################## TESTS ##########################################
+		if args.test!=None:
+			# Execute unit tests
 
-		tests=[
-		("A -> A","A","A"),
-		("A -> A","B","B"),
-		("A -> A B","A","A B"),
-		("A -> B\n B -> C D", "A", "A B C D"),
-		("A -> A\n A -> A\n B -> F G","B E","B F G E")
-		]
+			tests=[
+			("A -> A","A","A"),
+			("A -> A","B","B"),
+			("A -> A B","A","A B"),
+			("A -> B\n B -> C D", "A", "A B C D"),
+			("A -> A\n A -> A\n B -> F G","B E","B F G E")
+			]
 
-		num=1
-		failed=0
-		# Test[i]=( fd, attr, result)
-
-
-		print("Executing Unit tests:")
-		
-
-		print("Testing Attributes method:")
-		for t in tests:
-			file=open("/tmp/test",'w')
-			file.write(t[0])
-			file.close()
-
-			file=open("/tmp/test",'r')
-			fun_deps, ref_attr=libinput.parseInput(file, None)
-			file.close()
+			num=1
+			failed=0
+			# Test[i]=( fd, attr, result)
 
 
-			for str_attr in ref_attr:
-				attr=ref_attr[str_attr]
-				print("\t\t#{}".format(num), end=" ")
-				num+=1
-				if len(attr.lst)!=0:
-					print("Error: non-empty list at initialisation for attr {} (size {})".format(attr, len(attr.lst)))
-					failed+=1
-				else:
-					print("-> ok")
+			print("Executing Unit tests:")
+			
+
+			print("Testing Attributes method:")
+			for t in tests:
+				file=open("/tmp/test",'w')
+				file.write(t[0])
+				file.close()
+
+				file=open("/tmp/test",'r')
+				fun_deps, ref_attr=libinput.parseInput(file, None)
+				file.close()
 
 
-				print("\t\t#{}".format(num), end=" ")
-				num+=1
-				lst=set()
-				for fd2 in fun_deps:
-					attr.addLst(fd2)
-					lst.add(fd2)
-					if attr.lst!=lst:
-						print("Error: addLst() wrongly add {}: lst is {} instead of {}".format(fd2,attr.lst,lst))
+				for str_attr in ref_attr:
+					attr=ref_attr[str_attr]
+					print("\t\t#{}".format(num), end=" ")
+					num+=1
+					if len(attr.lst)!=0:
+						print("Error: non-empty list at initialisation for attr {} (size {})".format(attr, len(attr.lst)))
 						failed+=1
-						break
-				else:
-					print("-> ok")
+					else:
+						print("-> ok")
+
+
+					print("\t\t#{}".format(num), end=" ")
+					num+=1
+					lst=set()
+					for fd2 in fun_deps:
+						attr.addLst(fd2)
+						lst.add(fd2)
+						if attr.lst!=lst:
+							print("Error: addLst() wrongly add {}: lst is {} instead of {}".format(fd2,attr.lst,lst))
+							failed+=1
+							break
+					else:
+						print("-> ok")
 
 
 
-		print("Testing FD methods:")
-		for t in tests:
-			file=open("/tmp/test",'w')
-			file.write(t[0])
-			file.close()
+			print("Testing FD methods:")
+			for t in tests:
+				file=open("/tmp/test",'w')
+				file.write(t[0])
+				file.close()
 
-			file=open("/tmp/test",'r')
-			fun_deps, ref_attr=libinput.parseInput(file, None)
-			file.close()
+				file=open("/tmp/test",'r')
+				fun_deps, ref_attr=libinput.parseInput(file, None)
+				file.close()
 
-			print("\tTesting setCount() and isCountNull():")
-			for i in fun_deps:
-				print("\t\t#{}".format(num), end=" ")
-				num+=1
-				i.setCount()
-				if (i.count!=len(i.pre)):
-					print("Error on SetCount(): output is {} instead of {} for FD {}".format(i.count,len(i.pre),i))
-					failed+=1
-				elif (i.isCountNull()):
-					print("Error on isCountNull(): for FD {}, count = {}, output state that fd.count is null".format(i, i.count))
-					failed+=1
-				else:
-					print("-> ok")
+				print("\tTesting setCount() and isCountNull():")
+				for i in fun_deps:
+					print("\t\t#{}".format(num), end=" ")
+					num+=1
+					i.setCount()
+					if (i.count!=len(i.pre)):
+						print("Error on SetCount(): output is {} instead of {} for FD {}".format(i.count,len(i.pre),i))
+						failed+=1
+					elif (i.isCountNull()):
+						print("Error on isCountNull(): for FD {}, count = {}, output state that fd.count is null".format(i, i.count))
+						failed+=1
+					else:
+						print("-> ok")
+
+
+					
+				print("\tTesting decCount() and is CountNull()")
+				for i in fun_deps:
+					values=range(i.count-1,-1,-1)
+					print("\t\t#{}".format(num), end=" ")
+					num+=1
+					for j in values:
+						i.decCount()
+						if i.count!=j:
+							failed+=1
+							print("Error on decCount() for FD {} while decreasing to {}".format(i, j))
+							break
+						elif (i.isCountNull() and j!=0):
+							print("Error on isCountNull(): for FD {}, count = {}, output state taht fd.count is null".format(i, i.count))
+							failed+=1
+							break
+					else:
+						print("-> ok")
+
+				print("\tTesting is CountNull():")
+				for i in fun_deps:
+					print("\t\t#{}".format(num), end=" ")
+					num+=1
+					if not(i.isCountNull()):
+						failed+=1
+						print("Error on isCountNull() for FD {} with count = {}".format(i, i.count))
+					else:
+						print("-> ok")
+
+
+			print("Testing algorithm output:")
+			# Testing whole algorithm
+			print("\tTesting naive alg:")
+			for t in tests:
+				file=open("/tmp/test",'w')
+				file.write(t[0])
+				file.close()
+
+				file=open("/tmp/test",'r')
+				fun_deps, ref_attr=libinput.parseInput(file, None)
+				file.close()
+
+				set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
+				result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
 
 
 				
-			print("\tTesting decCount() and is CountNull()")
-			for i in fun_deps:
-				values=range(i.count-1,-1,-1)
 				print("\t\t#{}".format(num), end=" ")
 				num+=1
-				for j in values:
-					i.decCount()
-					if i.count!=j:
-						failed+=1
-						print("Error on decCount() for FD {} while decreasing to {}".format(i, j))
-						break
-					elif (i.isCountNull() and j!=0):
-						print("Error on isCountNull(): for FD {}, count = {}, output state taht fd.count is null".format(i, i.count))
-						failed+=1
-						break
-				else:
-					print("-> ok")
-
-			print("\tTesting is CountNull():")
-			for i in fun_deps:
-				print("\t\t#{}".format(num), end=" ")
-				num+=1
-				if not(i.isCountNull()):
+				closu=cl_alg.naive(set_attr, fun_deps, None)
+				if result!=closu:
+					print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
 					failed+=1
-					print("Error on isCountNull() for FD {} with count = {}".format(i, i.count))
 				else:
 					print("-> ok")
 
+			print("\tTesting improved alg:")
+			for t in tests:
+				file=open("/tmp/test",'w')
+				file.write(t[0])
+				file.close()
 
-		print("Testing algorithm output:")
-		# Testing whole algorithm
-		print("\tTesting naive alg:")
-		for t in tests:
-			file=open("/tmp/test",'w')
-			file.write(t[0])
-			file.close()
+				file=open("/tmp/test",'r')
+				fun_deps, ref_attr=libinput.parseInput(file, None)
+				file.close()
 
-			file=open("/tmp/test",'r')
-			fun_deps, ref_attr=libinput.parseInput(file, None)
-			file.close()
+				set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
+				result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
 
-			set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
-			result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
+				
+				print("\t\t#{}".format(num), end=" ")
+				num+=1
+				closu=cl_alg.improved(set_attr, fun_deps, None)
+				if result!=closu:
+					print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
+					failed+=1
+				else:
+					print("-> ok")
 
+			num-=1
 
-			
-			print("\t\t#{}".format(num), end=" ")
-			num+=1
-			closu=cl_alg.naive(set_attr, fun_deps, None)
-			if result!=closu:
-				print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
-				failed+=1
+			if failed:
+				print("Error: {}/{} tests failed".format(failed, num))
 			else:
-				print("-> ok")
+				print("Passed: {}/{} tests".format(num, num))
 
-		print("\tTesting improved alg:")
-		for t in tests:
-			file=open("/tmp/test",'w')
-			file.write(t[0])
-			file.close()
+			exit()
 
-			file=open("/tmp/test",'r')
-			fun_deps, ref_attr=libinput.parseInput(file, None)
-			file.close()
 
-			set_attr, ref_attr=libinput.parseAtts(t[1], ref_attr, None)
-			result, ref_attr=libinput.parseAtts(t[2], ref_attr, None)
+		########################################## GENERATE ##########################################
+		if args.generate!=None:
+			out=[]
+			for i in range(args.generate):
+				out+=["{} -> {}".format(i,i+1)]
+			shuffle(out)
+			for i in out:
+				print(i)
+			exit()
 
-			
-			print("\t\t#{}".format(num), end=" ")
-			num+=1
-			closu=cl_alg.improved(set_attr, fun_deps, None)
-			if result!=closu:
-				print("Failed on input {} with FD {}, output is {} instead of {}".format(t[1], t[0], str(closu), str(result)))
-				failed+=1
-			else:
-				print("-> ok")
 
-		num-=1
-
-		if failed:
-			print("Error: {}/{} tests failed".format(failed, num))
+		########################################## PARSE ##########################################
+		if args.input=="-":
+			input_source=sys.stdin
 		else:
-			print("Passed: {}/{} tests".format(num, num))
+			try:
+				input_source=open(args.input,'r')
+			except FileNotFoundError:
+				print("Error: File {} not found".format(args.input))
+				exit(-1)
 
-		exit()
+		fun_deps, ref_attr=libinput.parseInput(input_source, args.debug)
 
-
-	########################################## GENERATE ##########################################
-	if args.generate!=None:
-		out=[]
-		for i in range(args.generate):
-			out+=["{} -> {}".format(i,i+1)]
-		shuffle(out)
-		for i in out:
-			print(i)
-		exit()
+		if args.input!="-":
+			input_source.close()
 
 
-	########################################## PARSE ##########################################
-	if args.input=="-":
-		input_source=sys.stdin
-	else:
-		try:
-			input_source=open(args.input,'r')
-		except FileNotFoundError:
-			print("Error: File {} not found".format(args.input))
-			exit(-1)
-
-	fun_deps, ref_attr=libinput.parseInput(input_source, args.debug)
-
-	if args.input!="-":
-		input_source.close()
-
-
-	if args.debug:
-		print("Used_attr:", end=" ")
-		for i in ref_attr:
-			print(i, end=" ")
-		print()
-
-	########################################## ALGORITHMS ##########################################
-	if args.naive!=None or args.improved!=None:
-		set_attr, ref_attr=libinput.parseAtts(args.atts, ref_attr, args.debug)
-
-		if args.naive!=None:
-			closu=cl_alg.naive(set_attr, fun_deps, args.debug)
-			print("The closure of {} is:".format(set_attr), end=" ")
-			print(closu)
-
-		elif args.improved!=None:
-			closu=cl_alg.improved(set_attr, fun_deps, args.debug)
-			print("The closure of {} is:".format(set_attr), end=" ")
-			print(closu)
-
-	########################################## NORMALIZE ##########################################
-	elif args.normalized!=None:
-		mini=cl_alg.minimize(fun_deps, args.debug)
 		if args.debug:
-			print("The minimized form is:")
-			print(mini)
-		norm=cl_alg.reduce(mini, args.debug)
-		print("The normal form is:")
-		print(norm)
+			print("Used_attr:", end=" ")
+			for i in ref_attr:
+				print(i, end=" ")
+			print()
 
-	########################################## DECOMPOSE ##########################################
-	elif args.decompose!=None:
-		#TO BE TESTED !
-		dec=cl_alg.decompose(fun_deps, cl_alg.schema(fun_deps), args.debug)
-		print("The BCNF is:")
-		print(dec)
+		########################################## ALGORITHMS ##########################################
+		if args.naive!=None or args.improved!=None:
+			set_attr, ref_attr=libinput.parseAtts(args.atts, ref_attr, args.debug)
 
-	#except Exception as err:
-	#	exc_type, exc_obj, exc_tb = sys.exc_info()
-	#	fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-	#	if debug:
-	#		print("{} l.{}: {}" .format(fname, exc_tb.tb_lineno, err))
-	#	else:
-	#		print(err)
+			if args.naive!=None:
+				closu=cl_alg.naive(set_attr, fun_deps, args.debug)
+				print("The closure of {} is:".format(set_attr), end=" ")
+				print(closu)
+
+			elif args.improved!=None:
+				closu=cl_alg.improved(set_attr, fun_deps, args.debug)
+				print("The closure of {} is:".format(set_attr), end=" ")
+				print(closu)
+
+		########################################## NORMALIZE ##########################################
+		elif args.normalized!=None:
+			mini=cl_alg.minimize(fun_deps, args.debug)
+			if args.debug:
+				print("The minimized form is:")
+				print(mini)
+			norm=cl_alg.reduce(mini, args.debug)
+			print("The normal form is:")
+			print(norm)
+
+		########################################## DECOMPOSE ##########################################
+		elif args.decompose!=None:
+			dec=cl_alg.decompose(fun_deps, cl_alg.schema(fun_deps), args.debug)
+			print("The BCNF is:")
+			print(dec)
+
+	except Exception as err:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+		if debug:
+			print("{} l.{}: {}" .format(fname, exc_tb.tb_lineno, err))
+		else:
+			print(err)
 
 
 
